@@ -3,7 +3,7 @@ App::uses('GenericAuthAppController', 'GenericAuth.Controller');
 /**
  * Generic component to handle different ways of authentication especially social network authentication using(OpenId and OAuth2)
  * This is basically wrapper around third party implementation
- * To beging with it is cakephp wrappen for HybridAuth implementation. 
+ * To beging with it is cakephp wrappen for HybridAuth implementation.
  * Please refer http://hybridauth.sourceforge.net/ for details about HybridAuth
  * This basically delegates to the HybriAuth library and then gets the user profile from it
  * User profile is then conveted to User model data and then saved in the database if not already available
@@ -25,18 +25,18 @@ class SocialAuthController extends GenericAuthAppController {
 		$this->Auth->allow('index', 'authenticate');
 		//parent::beforeFilter();
 	}
-	
-	public function index(){		
+
+	public function index(){
 		$this->SocialAuth->process_authentication();
 	}
 /**
  * Entry points for authetication through generic auth.
  * Provider cab be google, facebook etc
  * @param string $provider
- * @param boolean $doRedirect 
+ * @param boolean $doRedirect
  * @param string $redirUrl landing url post authentication, defaults to auth login redirect url
  * @param string $authId auth handles e.g facebookid. Useful when using facebook javascript and php sdk together wherein js can pass handle
- */	
+ */
 	public function authenticate($provider, $defaultRoleId = null, $doRedirect = true, $redirUrl = null, $authId = null) {
 		$alreadyLoggedin = false;
 		$this->log('starting common auth');
@@ -51,7 +51,7 @@ class SocialAuthController extends GenericAuthAppController {
 			$authUsr = $this->getLoggedInUser();
 			$this->log($authUsr);
 			$userSocialNetwork = $this->UserSocialNetwork->getDetailsByAuthIdAndProvider($userProfile['UserSocialNetwork']['social_net_id'],$provider);
-			
+
 			// Check if user is already provisioned in our database. If not then save the record in our database
 			if (empty($userSocialNetwork)) {
 				if (!empty($authUsr) && $userProfile['User']['email'] == $authUsr['User']['email']){//Alredy logged in to the application with the same email as with this social login. Just associate with this social record with loggedin record
@@ -64,8 +64,8 @@ class SocialAuthController extends GenericAuthAppController {
 						$this->User->save($userProfile['User'], array('validate' => false));
 						$this->log($this->User->validatorErrors);
 						$userId = $this->User->id;
-						
-						
+
+
 						$user=$this->User->findById($userId);
 						$user['User']['email'] = $user['User']['username'];
 						if(strpos($userProfile['User']['email'],"@") !==false){
@@ -100,7 +100,7 @@ class SocialAuthController extends GenericAuthAppController {
 				$authUsr = array();
 				//$this->Session->destroy();
 				$this->Auth->logout();
-			}			
+			}
 			//If not already authenticated with cake auth then do manual auth login
 			if(empty($authUsr)){
 				$user = $this->User->findById($userId);//get the provisioned user record from our database
@@ -110,11 +110,11 @@ class SocialAuthController extends GenericAuthAppController {
 			if(!empty($authUsr) && $authUsr['User']['id'] != $userId ){
 				$upUsN = array('id' => $userSocialNetwork['UserSocialNetwork']['id'],'user_id' =>  $authUsr['User']['id']);
 				$this->UserSocialNetwork->save($upUsN);
-			}			
-			
+			}
+
 			$this->log('rediecting to '.$redirUrl);
 			if($doRedirect){
-				$this->Session->setFlash(__('Successfully logged in with %s', Inflector::humanize($provider))); 
+				$this->Session->setFlash(__('Successfully logged in with %s', Inflector::humanize($provider)), 'flash_success');
 				return $this->redirect($redirUrl);//take user to redirect url
 			}
 		}
@@ -133,7 +133,7 @@ class SocialAuthController extends GenericAuthAppController {
 		}
 		return $redcUrl;
 	}
-	
+
 /**
  * Returns the current logged in user from the session
  * Will need changes as we move to Auth component
@@ -144,15 +144,15 @@ class SocialAuthController extends GenericAuthAppController {
 		if(!empty($curUser) && empty($curUser['User'])){
 			$curUser['User']=$this->Auth->user();
 			//$this->__storeUserPhotoInSession($curUser);
-	
+
 		}
-	
+
 		return $curUser;
 	}
 
 /**
  * Gets the contacts(friends) list
- */	
+ */
 	public function contacts($provider){
 		//$this->autoLayout = null;
 		$this->layout = 'no_header_footer';
@@ -160,6 +160,6 @@ class SocialAuthController extends GenericAuthAppController {
 		$authUsr=$this->getLoggedInUser();
 		$userSocialNetwork = $this->User->UserSocialNetwork->getUserByUserIdAndProvider($authUsr['User']['id'],$provider);
 		$this->set("contactList",$userSocialNetwork['UserSocialNetwork']['contacts_data']);
-	
-	}	
+
+	}
 }
