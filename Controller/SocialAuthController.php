@@ -61,7 +61,7 @@ class SocialAuthController extends GenericAuthAppController {
 					if(empty($user)){
 						//If user with no email is in our database then save the user record
 						//$this->User->save($userProfile);
-						$this->User->add($userProfile['User'], array('validate' => false));
+						$this->User->save($userProfile['User'], array('validate' => false));
 						$this->log($this->User->validatorErrors);
 						$userId = $this->User->id;
 						
